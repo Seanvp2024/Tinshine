@@ -161,7 +161,7 @@ export default function LoginPage() {
   );
 }
 
- // 数据同步状态指示器（用于前台页面）
+  // 数据同步状态指示器（用于前台页面）
 export function PublicDataSyncIndicator() {
   const [lastSync, setLastSync] = useState<string>('Never');
   const [hasUpdate, setHasUpdate] = useState(false);
@@ -230,8 +230,58 @@ export function PublicDataSyncIndicator() {
     }
   };
   
-  if (!hasUpdate) return null;
+  // 添加强制同步按钮（始终显示）
+  const handleForceSync = async () => {
+    try {
+      setIsCheckingUpdate(true);
+      const success = await db.syncAllData();
+      
+      if (success) {
+        toast.success('Data refreshed successfully!');
+        setLastSync(new Date().toLocaleString());
+        localStorage.setItem(`${APP_ID}_last_sync`, Date.now().toString());
+      } else {
+        toast.error('Failed to refresh data');
+      }
+    } catch (error) {
+      toast.error('Error refreshing data');
+      console.error('Error during refresh:', error);
+    } finally {
+      setIsCheckingUpdate(false);
+    }
+  };
   
+  // 显示新版本通知
+  if (hasUpdate) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="fixed bottom-4 right-4 z-50"
+      >
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-4 flex items-center justify-between max-w-xs">
+          <div className="flex items-center">
+            <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mr-3">
+              <i className="fas fa-sync-alt text-green-600 dark:text-green-400"></i>
+            </div>
+            <div>
+              <h4 className="font-medium">New content available</h4>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Click to update</p>
+            </div>
+          </div>
+          <button
+            onClick={handleSyncData}
+            className="ml-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-300"
+          >
+            Update
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
+  
+  // 显示强制刷新按钮
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -239,23 +289,13 @@ export function PublicDataSyncIndicator() {
       transition={{ duration: 0.5 }}
       className="fixed bottom-4 right-4 z-50"
     >
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-4 flex items-center justify-between max-w-xs">
-        <div className="flex items-center">
-          <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mr-3">
-            <i className="fas fa-sync-alt text-green-600 dark:text-green-400"></i>
-          </div>
-          <div>
-            <h4 className="font-medium">New content available</h4>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Click to update</p>
-          </div>
-        </div>
-        <button
-          onClick={handleSyncData}
-          className="ml-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-300"
-        >
-          Update
-        </button>
-      </div>
+      <button
+        onClick={handleForceSync}
+        className="bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg p-3 transition-all duration-300 flex items-center justify-center"
+        title="Refresh data from server"
+      >
+        <i className="fas fa-sync-alt"></i>
+      </button>
     </motion.div>
   );
 }

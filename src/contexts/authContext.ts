@@ -46,5 +46,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export const verifyCredentials = (username: string, password: string): boolean => {
   // 简单的模拟验证逻辑
   // 实际项目中应该调用API进行验证
+  // 注意：在生产环境中应使用更安全的验证方式
   return username === 'admin' && password === 'password123';
 };

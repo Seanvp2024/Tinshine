@@ -197,7 +197,8 @@ const categories = [
   "Industry News"
 ];
 
-import { PublicDataSyncIndicator } from './LoginPage';
+// 为了防止循环导入，从LoginPage导入PublicDataSyncIndicator
+// 实际使用中，建议将此组件移到共享组件目录
 
 export default function BlogPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");

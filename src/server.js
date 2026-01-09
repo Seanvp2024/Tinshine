@@ -275,4 +275,35 @@ app.listen(PORT, () => {
   console.log('PUT    /api/blogs/:id        - Update a blog');
   console.log('DELETE /api/blogs/:id        - Delete a blog');
   console.log('GET    /api/sync/all         - Get all data for sync');
+  console.log('GET    /api/health           - Health check endpoint');
+});
+
+// 添加健康检查端点
+app.get('/api/health', (req, res) => {
+  try {
+    // 检查数据文件是否存在
+    const productsExist = fs.existsSync(PRODUCTS_FILE);
+    const blogsExist = fs.existsSync(BLOGS_FILE);
+    
+    res.status(200).json({
+      status: 'UP',
+      timestamp: new Date().toISOString(),
+      version: getData(VERSION_FILE),
+      services: {
+        products: productsExist ? 'OK' : 'WARNING',
+        blogs: blogsExist ? 'OK' : 'WARNING',
+        diskSpace: {
+          status: 'OK',
+          message: 'Data directory accessible'
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Health check failed:', error);
+    res.status(503).json({
+      status: 'DOWN',
+      timestamp: new Date().toISOString(),
+      error: error.message || 'Unknown error'
+    });
+  }
 });

@@ -976,7 +976,7 @@ export default function AdminDashboard() {
   );
 };
 
-  {/* 数据同步状态指示器组件 */}
+   {/* 数据同步状态指示器组件 - 增强版 */}
   export function DataSyncIndicator() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSync, setLastSync] = useState<string>('Never');
@@ -1034,6 +1034,11 @@ export default function AdminDashboard() {
         toast.success('Data synced successfully!');
         setLastSync(new Date().toLocaleString());
         localStorage.setItem(`${APP_ID}_last_sync`, Date.now().toString());
+        
+        // 自动刷新页面以显示最新数据
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
       } else {
         toast.error('Failed to sync data or data is not newer');
       }
@@ -1054,7 +1059,7 @@ export default function AdminDashboard() {
       // 创建下载链接
       const exportLink = document.createElement('a');
       exportLink.href = dataUri;
-      exportLink.download = `tinshine-sync-${new Date().toISOString().split('T')[0]}.json`;
+      exportLink.download = `metalboxpack-sync-${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(exportLink);
       exportLink.click();
       document.body.removeChild(exportLink);
@@ -1070,14 +1075,58 @@ export default function AdminDashboard() {
     }
   };
   
+  // 从服务器同步数据
+  const handleServerSync = async () => {
+    try {
+      setIsSyncing(true);
+      const success = await db.syncAllData();
+      
+      if (success) {
+        toast.success('Data synced with server successfully!');
+        setLastSync(new Date().toLocaleString());
+        localStorage.setItem(`${APP_ID}_last_sync`, Date.now().toString());
+        
+        // 自动刷新页面以显示最新数据
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        toast.error('Failed to sync data with server');
+      }
+    } catch (error) {
+      toast.error('Error syncing with server');
+      console.error('Error during server sync:', error);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+  
   return (
-    <div className="fixed bottom-4 right-4 flex gap-2 z-50">
+    <div className="fixed bottom-4 right-4 flex flex-wrap gap-2 justify-end z-50">
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={handleServerSync}
+        disabled={isSyncing}
+        className={`px-4 py-2 rounded-full shadow-lg transition-all duration-300 flex items-center whitespace-nowrap ${
+          isSyncing ? 'bg-gray-500 text-white cursor-not-allowed' : 'bg-purple-600 text-white hover:bg-purple-700'
+        }`}
+        title="Sync data with server"
+      >
+        {isSyncing ? (
+          <i className="fas fa-spinner fa-spin mr-2"></i>
+        ) : (
+          <i className="fas fa-cloud-upload-alt mr-2"></i>
+        )}
+        {isSyncing ? 'Server Sync...' : 'Server Sync'}
+      </motion.button>
+      
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={handleExportData}
         disabled={isSyncing}
-        className={`px-4 py-2 rounded-full shadow-lg transition-all duration-300 flex items-center ${
+        className={`px-4 py-2 rounded-full shadow-lg transition-all duration-300 flex items-center whitespace-nowrap ${
           isSyncing ? 'bg-gray-500 text-white cursor-not-allowed' : 'bg-green-600 text-white hover:bg-green-700'
         }`}
         title="Export data for syncing"
@@ -1095,7 +1144,7 @@ export default function AdminDashboard() {
         whileTap={{ scale: 0.95 }}
         onClick={handleImportData}
         disabled={isSyncing}
-        className={`px-4 py-2 rounded-full shadow-lg transition-all duration-300 flex items-center ${
+        className={`px-4 py-2 rounded-full shadow-lg transition-all duration-300 flex items-center whitespace-nowrap ${
           isSyncing ? 'bg-gray-500 text-white cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'
         }`}
         title="Import data from another device"
@@ -1108,7 +1157,7 @@ export default function AdminDashboard() {
         {isSyncing ? 'Syncing...' : 'Import Data'}
       </motion.button>
       
-      <div className="px-4 py-2 bg-white dark:bg-gray-800 rounded-full shadow-lg text-sm text-gray-700 dark:text-gray-300 flex items-center">
+      <div className="px-4 py-2 bg-white dark:bg-gray-800 rounded-full shadow-lg text-sm text-gray-700 dark:text-gray-300 flex items-center whitespace-nowrap">
         <i className="fas fa-clock mr-2 text-gray-500"></i>
         <span className="hidden sm:inline">Last sync: {lastSync}</span>
         <span className="sm:hidden">Last: {lastSync.split(',')[0]}</span>

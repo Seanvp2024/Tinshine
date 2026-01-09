@@ -8,8 +8,10 @@ import ProductCard from '@/components/ProductCard';
 import { motion } from 'framer-motion';
 import { productCategories, getAllProducts, getProductsByCategory, getFeaturedProducts } from '@/lib/productData';
 import { productDb, db } from '@/services/dbService';
+import { PublicDataSyncIndicator } from '@/pages/LoginPage';
 
-import { PublicDataSyncIndicator } from './LoginPage';
+// 实际使用中，建议将PublicDataSyncIndicator组件移到共享组件目录
+
 
 export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);

@@ -344,6 +344,29 @@ export class DatabaseService {
       window.removeEventListener('storage', handleStorageChange);
     };
   }
+  
+  // 自动同步机制 - 定期检查并同步数据
+  setupAutoSync(intervalMinutes: number = 15): () => void {
+    const syncInterval = setInterval(async () => {
+      try {
+        // 仅在用户活跃时同步
+        if (document.visibilityState === 'visible') {
+          const currentVersion = await this.getCurrentVersion();
+          const hasUpdate = await this.checkForUpdates(currentVersion);
+          
+          if (hasUpdate) {
+            console.log('New data available, syncing...');
+            await this.syncAllData();
+          }
+        }
+      } catch (error) {
+        console.error('Auto-sync failed:', error);
+      }
+    }, intervalMinutes * 60 * 1000);
+    
+    // 返回清理函数
+    return () => clearInterval(syncInterval);
+  }
 
   // 获取当前数据版本号（从服务器）
   async getCurrentVersion(): Promise<number> {

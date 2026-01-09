@@ -71,10 +71,18 @@ export default function App() {
       // 这个处理函数会在数据更新时被调用
       // 在实际应用中，这里可以添加一些全局状态更新逻辑
       console.log('Data updated globally');
+      // 可以在这里添加重新加载数据的逻辑
     };
 
     const unsubscribe = db.onDataUpdate(handleDataUpdate);
-    return () => unsubscribe();
+    
+    // 设置自动同步机制，每15分钟检查一次更新
+    const stopAutoSync = db.setupAutoSync(15);
+    
+    return () => {
+      unsubscribe();
+      stopAutoSync();
+    };
   }, []);
 
   return (

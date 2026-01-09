@@ -16,6 +16,17 @@ import { db } from "./services/dbService";
 // 加载保存的图片数据库
 db.loadImageDb();
 
+// 添加全局错误处理
+window.addEventListener('error', (event) => {
+  console.error('Global error:', event.error);
+  // 在生产环境中，这里可以添加错误上报逻辑
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', event.reason);
+  // 在生产环境中，这里可以添加错误上报逻辑
+});
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
