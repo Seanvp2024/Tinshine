@@ -67,8 +67,13 @@ app.get('/api/version', (req, res) => {
 
 // API端点 - 产品管理
 app.get('/api/products', (req, res) => {
-  const products = getData(PRODUCTS_FILE);
-  res.json(products);
+  try {
+    const products = getData(PRODUCTS_FILE);
+    res.json(products);
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 app.get('/api/products/:id', (req, res) => {
@@ -132,8 +137,31 @@ app.delete('/api/products/:id', (req, res) => {
 
 // API端点 - 博客管理
 app.get('/api/blogs', (req, res) => {
-  const blogs = getData(BLOGS_FILE);
-  res.json(blogs);
+  try {
+    const blogs = getData(BLOGS_FILE);
+    res.json(blogs);
+  } catch (error) {
+    console.error('Error fetching blogs:', error);
+    // 返回默认的博客数据，避免前端出现空白页面
+    const defaultBlogs = [
+      {
+        id: 1,
+        title: "Welcome to Metal Box Pack",
+        excerpt: "Your premier destination for high-quality tin packaging solutions",
+        content: "Metal Box Pack provides premium tin packaging solutions for various industries including food, cosmetics, and more. Our products are designed to be durable, sustainable, and visually appealing.",
+        imageUrl: "https://space.coze.cn/api/coze_space/gen_image?image_size=landscape_16_9&prompt=Tin%20can%20packaging%20factory%20modern%20equipment%20production%20line&sign=947ccfb12838abe5f0d41ee67f040e65",
+        category: "Company News",
+        author: "Admin",
+        authorImage: "https://space.coze.cn/api/coze_space/gen_image?image_size=square_hd&prompt=Professional%20business%20man%20CEO%20confident%20portrait&sign=17bf79fcd820f1aa9e254cfaab9fe4b8",
+        date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+        readTime: 3,
+        likes: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    ];
+    res.json(defaultBlogs);
+  }
 });
 
 app.get('/api/blogs/:id', (req, res) => {
@@ -205,7 +233,29 @@ app.get('/api/sync/all', (req, res) => {
     };
     res.json(data);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to get sync data' });
+    console.error('Error getting sync data:', error);
+    // 返回基本的同步数据，确保前端能正常运行
+    res.status(500).json({
+      version: { version: 1, lastUpdated: new Date().toISOString() },
+      products: [],
+      blogs: [
+        {
+          id: 1,
+          title: "Welcome to Metal Box Pack",
+          excerpt: "Your premier destination for high-quality tin packaging solutions",
+          content: "Metal Box Pack provides premium tin packaging solutions for various industries including food, cosmetics, and more. Our products are designed to be durable, sustainable, and visually appealing.",
+          imageUrl: "https://space.coze.cn/api/coze_space/gen_image?image_size=landscape_16_9&prompt=Tin%20can%20packaging%20factory%20modern%20equipment%20production%20line&sign=947ccfb12838abe5f0d41ee67f040e65",
+          category: "Company News",
+          author: "Admin",
+          authorImage: "https://space.coze.cn/api/coze_space/gen_image?image_size=square_hd&prompt=Professional%20business%20man%20CEO%20confident%20portrait&sign=17bf79fcd820f1aa9e254cfaab9fe4b8",
+          date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+          readTime: 3,
+          likes: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      ]
+    });
   }
 });
 

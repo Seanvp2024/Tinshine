@@ -27,8 +27,9 @@ const DATA_VERSION_KEY = `${APP_ID}_data_version`;
 export const SYNC_DATA_KEY = `${APP_ID}_sync_data`;
 
 // 服务器API基础URL
-// 注意：在生产环境中需要将此URL更新为实际的API域名
-const API_BASE_URL = 'https://www.metalboxpack.com/api';
+// 优先从环境变量获取，如果没有则使用默认值
+// 在生产环境中，确保设置了正确的环境变量
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 
 // 模拟数据库服务类
 export class DatabaseService {
